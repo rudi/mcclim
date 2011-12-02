@@ -101,23 +101,25 @@
 		  collect `(:file ,(namestring p) :pathname ,p))))))
 
 (defsystem :clim-lisp
-    :components
-  (;; First possible patches
+  :components
+  ( ;; First possible patches
    (:file "patch")
    (:module "Lisp-Dep"
-            :depends-on ("patch")
-            :components
-            ((:file   #+cmu       "fix-cmu"
+    :depends-on ("patch")
+    :components
+    ((:file   #+cmu       "fix-cmu"
 		      #+scl       "fix-scl"
-                      #+excl      "fix-acl"
-                      #+sbcl      "fix-sbcl"
-                      #+openmcl   "fix-openmcl"
-                      #+lispworks "fix-lispworks"
-                      #+clisp     "fix-clisp")))
+              #+excl      "fix-acl"
+              #+sbcl      "fix-sbcl"
+              #+openmcl   "fix-openmcl"
+              #+lispworks "fix-lispworks"
+              #+clisp     "fix-clisp"
+              #+abcl      "fix-abcl")))
    (:file "package" :depends-on ("Lisp-Dep" "patch"))))
 
 (defsystem :clim-basic
-    :depends-on (:clim-lisp :spatial-trees (:version "flexichain" "1.5.1"))
+    :depends-on (:clim-lisp :spatial-trees (:version "flexichain" "1.5.1")
+                            #+abcl :bordeaux-threads)
     :components ((:file "decls")
 		 (:file "protocol-classes" :depends-on ("decls"))
                  (:module "Lisp-Dep"
@@ -131,6 +133,7 @@
                                       #+excl                    "mp-acl"
                                       #+openmcl                 "mp-openmcl"
                                       #+lispworks               "mp-lw"
+                                      #+abcl                    "mp-abcl"
                                       #| fall back |#           "mp-nil")))))
                  (:file "utils" :depends-on ("decls" "Lisp-Dep"))
                  (:file "design" :depends-on ("decls" "protocol-classes" "Lisp-Dep" "utils"))

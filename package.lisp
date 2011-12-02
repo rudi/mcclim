@@ -223,7 +223,8 @@
 	   #+(or mcl openmcl)      ,@'(:ccl)
            #+allegro               ,@'(:common-lisp :excl :stream)
            #+harlequin-common-lisp ,@'(:stream)
-           #+sbcl                  ,@'(:sb-gray))) )
+           #+sbcl                  ,@'(:sb-gray)
+           #+abcl                  ,@'(:gray-streams))) )
     ;;
     (labels ((seek-symbol (name packages)
                ;; seek the a symbol named 'name' in `packages'
