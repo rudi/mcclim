@@ -26,7 +26,8 @@
   #+sbcl (sb-ext::posix-getenv string)
   #+openmcl (ccl::getenv string)
   #+lispworks (lw:environment-variable string)
-  #-(or excl cmu scl clisp sbcl openmcl lispworks)
+  #+abcl (ext:getenv string)
+  #-(or excl cmu scl clisp sbcl openmcl lispworks abcl)
   (error "GET-ENVIRONMENT-VARIABLE not implemented"))
 
 ;;; It would be nice to define this macro in terms of letf, but that
