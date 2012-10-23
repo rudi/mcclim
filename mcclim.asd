@@ -369,7 +369,7 @@
 				     :name "tab-layout"))))
 
 (defsystem :clim-clx
-    :depends-on (:clim #+(or sbcl openmcl ecl allegro) :clx)
+    :depends-on (:clim #+(or sbcl openmcl ecl allegro abcl) :clx)
     :components
     ((:module "Backends/CLX"
               :pathname #.(make-pathname :directory '(:relative "Backends" "CLX"))
