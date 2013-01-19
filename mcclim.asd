@@ -474,6 +474,30 @@
 	       (:file "graft" :depends-on ("port" "package"))
 	       (:file "frame-manager" :depends-on ("medium" "port" "package"))))))
 
+(defsystem :clim-null
+    :depends-on (:clim)
+    :components
+    ((:module "Backends/Null"
+	      :pathname #.(make-pathname :directory '(:relative "Backends" "Null"))
+	      :components
+	      ((:file "package")
+	       (:file "port" :depends-on ("package"))
+	       (:file "medium" :depends-on ("port" "package"))
+	       (:file "graft" :depends-on ("port" "package"))
+	       (:file "frame-manager" :depends-on ("medium" "port" "package"))))))
+
+(defsystem :clim-abcl
+    :depends-on (:clim)
+    :components
+    ((:module "Backends/abcl"
+	      :pathname #.(make-pathname :directory '(:relative "Backends" "abcl"))
+	      :components
+	      ((:file "package")
+	       (:file "port" :depends-on ("package"))
+	       (:file "medium" :depends-on ("port" "package"))
+	       (:file "graft" :depends-on ("port" "package"))
+	       (:file "frame-manager" :depends-on ("medium" "port" "package"))))))
+
 (defsystem :clim-gtkairo
     :depends-on (:clim :cffi)
     :components
@@ -539,11 +563,11 @@
                  #+clim-beagle :clim-beagle
 
 		 #+clim-gtkairo :clim-gtkairo
-
+         #+abcl :clim-abcl
 		 ;; null backend
 		 :clim-null
                  )
-    :components (#-(or clim-gtkairo clim-graphic-forms clim-beagle)
+    :components (#-(or clim-gtkairo clim-graphic-forms clim-beagle abcl)
 		 (:file "Looks/pixie"
                         :pathname #.(make-pathname :directory '(:relative "Looks") :name "pixie" :type "lisp"))))
 

@@ -32,11 +32,12 @@
 ;;   it is the native Windows backend.
 ;; - Beagle should be treated like Graphic-Forms in the long term, but is
 ;;   currently lacking a maintainer, so let's leave it near the end.
+;; - abcl is a Java-based, abcl-specific backend.
 ;; - OpenGL and Null are in this list mostly to document their existence,
 ;;   and neither is currently a complete backend we would want to make
 ;;   a default.  Put them after CLX, so that they won't actually be reached.
 (defvar *server-path-search-order*
-    '(:graphic-forms :gtkairo :clx :opengl :beagle :null))
+    '(:graphic-forms :gtkairo :clx :abcl :opengl :beagle :null))
 
 (defun find-default-server-path ()
   (loop for port in *server-path-search-order*
