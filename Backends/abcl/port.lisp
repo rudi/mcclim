@@ -56,34 +56,38 @@
     ((port abcl-port) mirror mirror-transformation)
   ())
 
-(declaim (inline round-coordinate))
-(defun round-coordinate (x)
-  "Function used for rounding coordinates."
-  ;; Snarfed from CLX/port.lisp
-  ;;
-  ;; We use "mercantile rounding", instead of the CL round to nearest
-  ;; even number, when in doubt.
-  ;;
-  ;; Reason: As the CLIM drawing model is specified, you quite often
-  ;; want to operate with coordinates, which are multiples of 1/2.
-  ;; Using CL:ROUND gives you "random" results. Using "mercantile
-  ;; rounding" gives you consistent results.
-  (floor (+ x .5)))
+(defmethod realize-mirror :around ((port abcl-port) sheet)
+  (let* ((mirror (call-next-method))
+         (parent (sheet-parent sheet))
+         (parent-mirror (when parent (sheet-mirror parent))))
+    (setf (sheet-direct-mirror sheet) mirror)
+    (when (and mirror parent-mirror (java:java-object-p parent-mirror))
+      ;; KLUDGE: I'm sure this will break horribly RSN - factor out into
+      ;; its own gf once we discover parents with differently-named
+      ;; methods for adding children.  Also, currently grafts are
+      ;; mirrored to (gensym), which is why we test that the mirror of
+      ;; the parent is actually a java object.
+      (java:jcall "add" parent-mirror mirror))
+    mirror))
 
 (defmethod realize-mirror ((port abcl-port) (sheet mirrored-sheet-mixin))
+  (error "Unimplemented realize-mirror for ~A" sheet))
+
+(defmethod realize-mirror ((port abcl-port) (sheet vrack-pane))
+  (let* ((pane (java:jnew "javax.swing.JTable"))
+         (layout (java:jnew "javax.swing.BoxLayout" pane
+                            (java:jfield "javax.swing.BoxLayout" "Y_AXIS"))))
+    (java:jcall "setLayout" pane layout)
+    pane))
+
+(defmethod realize-mirror ((port abcl-port) (sheet label-pane))
+  (java:jnew "javax.swing.JLabel" (climi::label-pane-label sheet)))
+
+(defmethod realize-mirror ((port abcl-port) (sheet climi::menu-bar))
   nil)
 
 (defmethod realize-mirror ((port abcl-port) (sheet top-level-sheet-pane))
-  (let* ((q (compose-space sheet))
-         (clim-frame (pane-frame sheet))
-         (java-frame (java:jnew "javax.swing.JFrame"
-                                (frame-pretty-name clim-frame))))
-    (java:jcall "setPreferredSize" java-frame
-                (java:jnew "java.awt.Dimension"
-                           (round-coordinate (space-requirement-width q))
-                           (round-coordinate (space-requirement-height q))))
-    (climi::port-register-mirror port sheet java-frame))
-  (climi::port-lookup-mirror port sheet))
+  (java:jnew "javax.swing.JFrame" (frame-pretty-name (pane-frame sheet))))
 
 (defmethod destroy-mirror ((port abcl-port) (sheet mirrored-sheet-mixin))
   ())
@@ -176,9 +180,7 @@
   nil)
 
 (defmethod port-deallocate-pixmap ((port abcl-port) pixmap)
-  #+nil
-  (when (port-lookup-mirror port pixmap)
-    (destroy-mirror port pixmap)))
+  nil)
 
 (defmethod pointer-position ((pointer abcl-pointer))
   (values (slot-value pointer 'x) (slot-value pointer 'y)))
