@@ -56,8 +56,34 @@
     ((port abcl-port) mirror mirror-transformation)
   ())
 
+(declaim (inline round-coordinate))
+(defun round-coordinate (x)
+  "Function used for rounding coordinates."
+  ;; Snarfed from CLX/port.lisp
+  ;;
+  ;; We use "mercantile rounding", instead of the CL round to nearest
+  ;; even number, when in doubt.
+  ;;
+  ;; Reason: As the CLIM drawing model is specified, you quite often
+  ;; want to operate with coordinates, which are multiples of 1/2.
+  ;; Using CL:ROUND gives you "random" results. Using "mercantile
+  ;; rounding" gives you consistent results.
+  (floor (+ x .5)))
+
 (defmethod realize-mirror ((port abcl-port) (sheet mirrored-sheet-mixin))
   nil)
+
+(defmethod realize-mirror ((port abcl-port) (sheet top-level-sheet-pane))
+  (let* ((q (compose-space sheet))
+         (clim-frame (pane-frame sheet))
+         (java-frame (java:jnew "javax.swing.JFrame"
+                                (frame-pretty-name clim-frame))))
+    (java:jcall "setPreferredSize" java-frame
+                (java:jnew "java.awt.Dimension"
+                           (round-coordinate (space-requirement-width q))
+                           (round-coordinate (space-requirement-height q))))
+    (climi::port-register-mirror port sheet java-frame))
+  (climi::port-lookup-mirror port sheet))
 
 (defmethod destroy-mirror ((port abcl-port) (sheet mirrored-sheet-mixin))
   ())
@@ -104,8 +130,8 @@
   (declare (ignore wait-function timeout))
   nil)
 
-(defmethod make-graft
-    ((port abcl-port) &key (orientation :default) (units :device))
+(defmethod make-graft ((port abcl-port)
+                       &key (orientation :default) (units :device))
   (make-instance 'abcl-graft
                  :port port :mirror (gensym)
                  :orientation orientation :units units))

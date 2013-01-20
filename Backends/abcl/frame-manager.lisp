@@ -35,15 +35,21 @@
                         (intern (symbol-name name) :climi)
                         name) nil))))
 
-(defmethod make-pane-1
-    ((fm abcl-frame-manager) (frame application-frame) type &rest initargs)
+(defmethod make-pane-1 ((fm abcl-frame-manager) (frame application-frame)
+                        type &rest initargs)
   (apply #'make-instance (generic-concrete-pane-class type)
-	 :frame frame :manager fm :port (port frame)
-	 initargs))
+         :frame frame :manager fm :port (port frame)
+         initargs))
 
-(defmethod adopt-frame :after
-    ((fm abcl-frame-manager) (frame application-frame))
-  ())
+(defmethod note-frame-enabled ((fm abcl-frame-manager) frame)
+  (let ((sheet (frame-top-level-sheet frame)))
+    (java:jcall "setVisible" (sheet-direct-mirror sheet) java:+true+))
+  t)
+
+(defmethod note-frame-disabled ((fm abcl-frame-manager) frame)
+(let ((sheet (frame-top-level-sheet frame)))
+    (java:jcall "setVisible" (sheet-direct-mirror sheet) java:+false+))
+  t)
 
 (defmethod note-space-requirements-changed :after ((graft abcl-graft) pane)
   ())
