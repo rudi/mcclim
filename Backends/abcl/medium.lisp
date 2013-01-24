@@ -196,7 +196,7 @@
   nil)
 
 (defmethod medium-beep ((medium abcl-medium))
-  nil)
+  (jcall "beep" (jstatic "getDefaultToolkit" "java.awt.Toolkit")))
 
 (defmethod invoke-with-special-choices (continuation (medium abcl-medium))
   (let ((sheet (medium-sheet medium)))
