@@ -27,7 +27,9 @@
 (defclass abcl-port (basic-port)
   ((id)
    (pointer :accessor port-pointer :initform (make-instance 'abcl-pointer))
-   (window :initform nil :accessor abcl-port-window)))
+   (window :initform nil :accessor abcl-port-window)
+   (toolkit :initform (jstatic "getDefaultToolkit" "java.awt.Toolkit")
+            :reader java-toolkit)))
 
 (defun parse-abcl-server-path (path)
   path)

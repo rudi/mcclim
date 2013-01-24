@@ -23,9 +23,21 @@
   ())
 
 (defmethod graft-width ((graft abcl-graft) &key (units :device))
-  (declare (ignore units))
-  nil)
+  (let* ((toolkit (java-toolkit (port graft)))
+         (java-dimensions (jcall "getScreenSize" toolkit))
+         (dpi (jcall "getScreenResolution" toolkit)))
+    (ecase units
+      (:device (jcall "getWidth" java-dimensions))
+      (:inches (/ (jcall "getWidth" java-dimensions) dpi))
+      (:millimeters (* (/ (jcall "getWidth" java-dimensions) dpi) 25.4s0))
+      (:screen-sized 1))))
 
 (defmethod graft-height ((graft abcl-graft) &key (units :device))
-  (declare (ignore units))
-  nil)
+  (let* ((toolkit (java-toolkit (port graft)))
+         (java-dimensions (jcall "getScreenSize" toolkit))
+         (dpi (jcall "getScreenResolution" toolkit)))
+    (ecase units
+      (:device (jcall "getHeight" java-dimensions))
+      (:inches (/ (jcall "getHeight" java-dimensions) dpi))
+      (:millimeters (* (/ (jcall "getHeight" java-dimensions) dpi) 25.4s0))
+      (:screen-sized 1))))
