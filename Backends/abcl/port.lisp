@@ -52,11 +52,23 @@
     (format stream "~S ~S" :id (slot-value object 'id))))
 
 (defmethod port-set-mirror-region ((port abcl-port) mirror mirror-region)
-  ())
+  (error "Unimplemented for mirror ~A" mirror))
+
+(defmethod port-set-mirror-region ((port abcl-port)
+                                   (mirror (java:jclass "java.awt.Component"))
+                                   mirror-region)
+  (let ((width (floor (bounding-rectangle-width mirror-region)))
+        (height (floor (bounding-rectangle-height mirror-region))))
+    (java:jcall "setSize" mirror (java:jnew "java.awt.Dimension" width height))))
 
 (defmethod port-set-mirror-transformation
     ((port abcl-port) mirror mirror-transformation)
   ())
+
+(defgeneric java-add-child (parent child))
+
+(defmethod java-add-child (parent child)
+  (java:jcall "add" parent child))
 
 (defmethod realize-mirror :around ((port abcl-port) sheet)
   (let* ((mirror (call-next-method))
@@ -64,12 +76,10 @@
          (parent-mirror (when parent (sheet-mirror parent))))
     (setf (sheet-direct-mirror sheet) mirror)
     (when (and mirror parent-mirror (java:java-object-p parent-mirror))
-      ;; KLUDGE: I'm sure this will break horribly RSN - factor out into
-      ;; its own gf once we discover parents with differently-named
-      ;; methods for adding children.  Also, currently grafts are
-      ;; mirrored to (gensym), which is why we test that the mirror of
-      ;; the parent is actually a java object.
-      (java:jcall "add" parent-mirror mirror))
+      ;; KLUDGE: Currently grafts are mirrored to (gensym), which is why
+      ;; we test that the mirror of the parent is actually a java
+      ;; object.
+      (java-add-child parent-mirror mirror))
     mirror))
 
 (defmethod realize-mirror ((port abcl-port) (sheet mirrored-sheet-mixin))
