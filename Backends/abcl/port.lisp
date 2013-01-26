@@ -86,11 +86,10 @@
   (error "Unimplemented realize-mirror for ~A" sheet))
 
 (defmethod realize-mirror ((port abcl-port) (sheet vrack-pane))
-  (let* ((pane (java:jnew "javax.swing.JTable"))
-         (layout (java:jnew "javax.swing.BoxLayout" pane
-                            (java:jfield "javax.swing.BoxLayout" "Y_AXIS"))))
-    (java:jcall "setLayout" pane layout)
-    pane))
+  (java:jstatic "createVerticalBox" "javax.swing.Box"))
+
+(defmethod realize-mirror ((port abcl-port) (sheet hrack-pane))
+  (java:jstatic "createHorizontalBox" "javax.swing.Box"))
 
 (defmethod realize-mirror ((port abcl-port) (sheet label-pane))
   (java:jnew "javax.swing.JLabel" (climi::label-pane-label sheet)))
